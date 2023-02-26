@@ -1,0 +1,39 @@
+config-version = "1.0"
+bind = "0.0.0.0:25577"
+motd = "&#09add3A Velocity Server"
+show-max-players = 500
+online-mode = true
+prevent-client-proxy-connections = false
+player-info-forwarding-mode = "none"
+forwarding-secret = ""
+announce-forge = false
+kick-existing-players = false
+ping-passthrough = "DISABLED"
+try = [ "lobby" ]
+
+[servers]
+    lobby = "127.0.0.1:25566"
+    factions = "127.0.0.1:25577"
+
+[forced-hosts]
+    "lobby.example.com" = [ "lobby" ]
+
+[advanced]
+    compression-threshold = 256
+    compression-level = 6
+    login-ratelimit = 3000
+    connection-timeout = 5000
+    read-timeout = 30000
+    haproxy-protocol = false
+    tcp-fast-open = false
+    bungee-plugin-message-channel = true
+    show-ping-requests = false
+    failover-on-unexpected-server-disconnect = true
+    announce-proxy-commands = true
+    log-command-executions = false
+
+[query]
+    enabled = true
+    port = 25577
+    map = "Velocity"
+    show-plugins = false
