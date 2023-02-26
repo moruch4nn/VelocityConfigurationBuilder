@@ -91,7 +91,9 @@ fun main(args: Array<String>) {
         )
     )
     val result = Toml.encodeToString(configuration)
-    File("new.toml").writeText(result)
+    val file = File("velocity.toml")
+    if(!file.exists()) { file.createNewFile() }
+    file.writeText(result)
 }
 
 @Serializable
