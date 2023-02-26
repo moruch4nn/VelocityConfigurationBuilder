@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "1.8.0"
     kotlin("plugin.serialization") version "1.8.10"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
     application
 }
 
@@ -12,14 +13,19 @@ repositories {
 }
 
 dependencies {
-    testImplementation(kotlin("test"))
     implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.5")
-    implementation("com.akuleshov7:ktoml-core:0.4.0")
-    implementation("com.akuleshov7:ktoml-file:0.4.0")
+    implementation("com.akuleshov7:ktoml-core:0.4.1")
+    implementation("com.akuleshov7:ktoml-file:0.4.1")
 }
 
-tasks.test {
-    useJUnitPlatform()
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = "dev.mr3n.vcb.cli.AppKt"
+    }
+}
+
+tasks.named("build") {
+    dependsOn("shadowJar")
 }
 
 kotlin {
