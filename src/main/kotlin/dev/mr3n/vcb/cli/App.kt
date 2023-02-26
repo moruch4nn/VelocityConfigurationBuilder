@@ -1,7 +1,6 @@
 package dev.mr3n.vcb.cli
 
 import com.akuleshov7.ktoml.Toml
-import com.akuleshov7.ktoml.file.TomlFileWriter
 import kotlinx.cli.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -56,7 +55,7 @@ fun main(args: Array<String>) {
     val queryShowPlugins by parser.option(ArgType.Boolean, "query_show_plugins", "qsp", "プラグインをQueryレスポンスにデフォルトで表示するかどうか").default(false)
     parser.parse(args)
     val configuration = VelocityConfiguration(
-        configVersion = "1.0",
+        configVersion = "2.5",
         bind = bind,
         motd = motd,
         showMaxPlayers = snowMaxPlayers,
