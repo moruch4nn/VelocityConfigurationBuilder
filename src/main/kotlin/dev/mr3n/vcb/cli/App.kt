@@ -53,6 +53,9 @@ fun main(args: Array<String>) {
     val queryPort by parser.option(ArgType.Int, "query_port", "qp", "Queryが有効になっている場合、Queryプロトコルはどのポートでリッスンするか").default(25577)
     val queryMap by parser.option(ArgType.String, "query_map", "qm", "Queryサービスに送信するサーバー名").default("Velocity")
     val queryShowPlugins by parser.option(ArgType.Boolean, "query_show_plugins", "qsp", "プラグインをQueryレスポンスにデフォルトで表示するかどうか").default(false)
+
+    val output by parser.option(ArgType.String, "output", "o", "config.tomlの出力先を指定します。例: /tmp/velocity.toml").required()
+
     parser.parse(args)
     val configuration = VelocityConfiguration(
         configVersion = "2.5",
@@ -91,7 +94,7 @@ fun main(args: Array<String>) {
         )
     )
     val result = Toml.encodeToString(configuration)
-    val file = File("velocity.toml")
+    val file = File(output)
     if(!file.exists()) { file.createNewFile() }
     file.writeText(result)
 }
