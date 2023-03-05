@@ -30,12 +30,14 @@ fun main(args: Array<String>) {
     val motd by parser.option(ArgType.String, "motd", "m", "サーバーのMOTDの設定。以来のカラーコードとjsonの両方をサポートします。").default("&#09add3A Velocity Server")
     val snowMaxPlayers by parser.option(ArgType.Int, "show_max_players", "smp", "サーバーの最大参加人数。").default(500)
     val onlineMode by parser.option(argTypeExplicitBoolean, "online_mode", "om", "Mojangでプレイヤーを認証する必要があるかどうか").default(true)
+    val forceKeyAuthentication by parser.option(argTypeExplicitBoolean, "force_key_authentication", "fka", "新しい公開鍵セキュリティ標準を強制すべきかどうか？").default(true)
     val preventClientProxyConnections by parser.option(argTypeExplicitBoolean, "prevent_client_proxy_connections", "pcpc", "クライアントのISP/ASが、Mojangの認証サーバからのものと異なる場合プレイヤーはKickされます。これは一部のVPNやプロキシ接続を切断するものですが保護としては脆弱です。").default(false)
     val playerInfoForwardingMode by parser.option(ArgType.String,"player_info_forwarding_mode", "pifm", "サーバーにIPアドレスなどを転送するかどうか。選択肢: `none` `legacy` `bungeeguard` `modern`").default("none")
-    val forwardingSecret by parser.option(ArgType.String, "forwarding_secret", "fs", "modernまたはbungeeguardのIP転送を使用している場合、これでsecretを設定します。").default("")
+    val forwardingSecretFile by parser.option(ArgType.String, "forwarding_secret_file", "fsf", "modernまたはbungeeguardのIP転送を使用している場合、これでsecretのファイルをを設定します。").default("forwarding.secret")
     val announceForge by parser.option(argTypeExplicitBoolean, "announce_forge", "af", "もしあなたのネットワークが`一貫して一つのmodpackを動かしている`のであれば、代わりに ping-passthrough = \"mods\" を使って、サーバリストでよりきれいに表示することを検討してみてください。").default(false)
     val kickExistingPlayers by parser.option(argTypeExplicitBoolean, "kick_existing_players", "kep", "trueの場合、重複した接続を試みようとしたプレイヤー(既にサーバーに居る方)をKickします。").default(false)
     val pingPassthrough by parser.option(ArgType.String, "ping_passthrough", "pp", "サーバーリストのPingリクエストをバックエンドサーバーに渡すべきかどうか。`disabled` `mods` `description` `all`").default("DISABLED")
+    val enablePlayerAddressLogging by parser.option(argTypeExplicitBoolean, "enable_player_address_logging", "epal", "falseの場合はプレーヤーのIPアドレスは、ログに<ip address withheld>で表示されます").default(true)
     val servers by parser.option(ArgType.String, "servers", "s", "登録するサーバー一覧を「名前1=ホスト:ポート,名前2=ホスト:ポート」の形式。").default("lobby=127.0.0.1:25566,factions=127.0.0.1:25577")
     val tryServers by parser.option(ArgType.String, "try", "t", "サーバーにログインしたとき、またはサーバーからキックされたときに、どのような順序で接続を試すべきか。lobby,survival,werewolf").default("lobby")
     val forcedHosts by parser.option(ArgType.String, "forced_hosts", "fh", "forced_hostsの設定。lobby.example.com=lobby1+lobby2,survival.example.com=survival1").default("lobby.example.com=lobby")
@@ -51,6 +53,7 @@ fun main(args: Array<String>) {
     val failoverOnUnexpectedServerDisconnect by parser.option(argTypeExplicitBoolean, "failover_on_unexpected_server_disconnect", "fousd", "読み取りタイムアウトの場合を除き、ユーザーをフォールバックさせようとすることで、明示的な切断メッセージなしでユーザーが予期せずサーバーへの接続を失った状況を適切に処理するかどうか").default(true)
     val announceProxyCommands by parser.option(argTypeExplicitBoolean, "announce_proxy_commands", "apc", "プロキシ コマンドを 1.13 以降のクライアントに定義するかどうか").default(true)
     val logCommandExecutions by parser.option(argTypeExplicitBoolean, "log_command_executions", "lce", "すべてのコマンドの実行をログに記録するかどうか").default(false)
+    val logPlayerConnections by parser.option(argTypeExplicitBoolean, "log_player_connections", "lpc", "プロキシへの接続時、サーバーの切り替え時、プロキシからの切断時にプレイヤーの接続をログに残すか").default(true)
     val queryEnabled by parser.option(argTypeExplicitBoolean, "query_enabled", "qe", "GameSpy 4のクエリ応答への応答を有効にするかどうか。").default(true)
     val queryPort by parser.option(ArgType.Int, "query_port", "qp", "Queryが有効になっている場合、Queryプロトコルはどのポートでリッスンするか").default(25577)
     val queryMap by parser.option(ArgType.String, "query_map", "qm", "Queryサービスに送信するサーバー名").default("Velocity")
@@ -65,12 +68,14 @@ fun main(args: Array<String>) {
         motd = motd,
         showMaxPlayers = snowMaxPlayers,
         onlineMode = onlineMode,
+        forceKeyAuthentication = forceKeyAuthentication,
         preventClientProxyConnections = preventClientProxyConnections,
         playerInfoForwardingMode = playerInfoForwardingMode,
-        forwardingSecret = forwardingSecret,
+        forwardingSecretFile = forwardingSecretFile,
         announceForge = announceForge,
         kickExistingPlayers = kickExistingPlayers,
         pingPassthrough = pingPassthrough,
+        enablePlayerAddressLogging = enablePlayerAddressLogging,
         servers = parseServers(servers),
         tryServers = tryServers.split(","),
         forcedHosts = parseForcedHosts(forcedHosts),
@@ -86,7 +91,8 @@ fun main(args: Array<String>) {
             showPingRequests = showPingRequests,
             failoverOnUnexpectedServerDisconnect = failoverOnUnexpectedServerDisconnect,
             announceProxyCommands = announceProxyCommands,
-            logCommandExecutions = logCommandExecutions
+            logCommandExecutions = logCommandExecutions,
+            logPlayerConnections = logPlayerConnections,
         ),
         query = VelocityConfiguration.Query(
             enabled = queryEnabled,
@@ -105,30 +111,39 @@ fun main(args: Array<String>) {
 data class VelocityConfiguration(
     @SerialName("config-version")
     val configVersion: String,
+    @SerialName("bind")
     val bind: String,
+    @SerialName("motd")
     val motd: String,
     @SerialName("show-max-players")
     val showMaxPlayers: Int,
     @SerialName("online-mode")
     val onlineMode: Boolean,
+    @SerialName("force-key-authentication")
+    val forceKeyAuthentication: Boolean,
     @SerialName("prevent-client-proxy-connections")
     val preventClientProxyConnections: Boolean,
     @SerialName("player-info-forwarding-mode")
     val playerInfoForwardingMode: String,
-    @SerialName("forwarding-secret")
-    val forwardingSecret: String,
+    @SerialName("forwarding-secret-file")
+    val forwardingSecretFile: String,
     @SerialName("announce-forge")
     val announceForge: Boolean,
     @SerialName("kick-existing-players")
     val kickExistingPlayers: Boolean,
     @SerialName("ping-passthrough")
     val pingPassthrough: String,
+    @SerialName("enable_player_address_logging")
+    val enablePlayerAddressLogging: Boolean,
+    @SerialName("servers")
     val servers: Map<String, String>,
     @SerialName("try")
     val tryServers: List<String>,
     @SerialName("forced-hosts")
     val forcedHosts: Map<String, List<String>>,
+    @SerialName("advanced")
     val advanced: Advanced,
+    @SerialName("query")
     val query: Query
 ) {
     @Serializable
@@ -156,7 +171,9 @@ data class VelocityConfiguration(
         @SerialName("announce-proxy-commands")
         val announceProxyCommands: Boolean,
         @SerialName("log-command-executions")
-        val logCommandExecutions: Boolean
+        val logCommandExecutions: Boolean,
+        @SerialName("log-player-connections")
+        val logPlayerConnections: Boolean
     )
 
     @Serializable
